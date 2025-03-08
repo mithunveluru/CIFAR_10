@@ -1,0 +1,64 @@
+import numpy as np
+import tensorflow as import numpy as np
+import tensorflow as tf
+
+# Import from other modules
+from data_prep import load_and_preprocess_data, visualize_examples
+from model import build_cnn_model, build_transfer_learning_model
+from train import train_model, train_transfer_learning_model
+from evaluate import evaluate_model
+
+# Set seeds for reproducibility
+np.random.seed(42)
+tf.random.set_seed(42)
+
+def main():
+    # Create results directory
+    output_dir = 'results'
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Class names for CIFAR-10
+    class_names = ['airplane', 'automobile', 'bird', 'cat', 'deer', 
+                   'dog', 'frog', 'horse', 'ship', 'truck']
+    
+     # Load and preprocess data
+    print("Step 1: Loading and preprocessing data")
+    (x_train, y_train), (x_val, y_val), (x_test, y_test) = load_and_preprocess_data()
+    
+    # Visualize examples
+    print("Step 2: Visualizing example images")
+    visualize_examples(x_train, y_train, class_names, output_dir)
+    
+    # Build and train CNN model
+    print("Step 3: Building and training CNN model")
+    model = build_cnn_model()
+    model, history = train_model(model, x_train, y_train, x_val, y_val, output_dir)
+    
+    # Evaluate model
+    print("Step 4: Evaluating CNN model")
+    evaluate_model(model, history, x_test, y_test, class_names, output_dir)
+    
+    # Ask user if they want to train transfer learning model
+    print("\nWould you like to train a transfer learning model? (y/n)")
+    choice = input().strip().lower()
+    
+    if choice == 'y':
+        # Build and train transfer learning model
+        print("Step 5: Building and training transfer learning model")
+        transfer_model = build_transfer_learning_model()
+        transfer_model, transfer_history = train_transfer_learning_model(
+            transfer_model, x_train, y_train, x_val, y_val, output_dir
+        )
+        
+        # Evaluate transfer learning model
+        print("Step 6: Evaluating transfer learning model")
+        evaluate_model(
+            transfer_model, transfer_history, x_test, y_test, 
+            class_names, output_dir + '/transfer_learning'
+        )
+    
+    print("\nAll tasks completed successfully!")
+
+if __name__ == "__main__":
+    main()
+
